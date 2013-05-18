@@ -5,13 +5,9 @@
         <title>@ViewBag.Title</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         @Styles.Render("~/Content/css")
-        @Scripts.Render("~/bundles/modernizr")
+        @Scripts.Render("~/Scripts/jquery-1.7.1.min.js")
     </head>
     <body>
-        
         @RenderBody()
-        
-        @Scripts.Render("~/bundles/jquery")
-        @RenderSection("scripts", required: false)
     </body>
 </html>

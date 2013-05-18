@@ -1,24 +1,22 @@
-﻿@model dynamic
-
-@{
+﻿@{
     ViewBag.Title = "title";
-    Layout = "_Layout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>Редактор схемы</h2>
 
 <div id="toolbox" style="float:left">
     <div>
-        <div class="toolbox-button">1</div>
-        <div class="toolbox-button">2</div>
+        <div class="toolbox-btn">1</div>
+        <div class="toolbox-btn">2</div>
     </div>
     <div>
-        <div class="toolbox-button">3</div>
-        <div class="toolbox-button">4</div>
+        <div class="toolbox-btn">3</div>
+        <div class="toolbox-btn">4</div>
     </div>
     <div>
-        <div class="toolbox-button">5</div>
-        <div class="toolbox-button">6</div>
+        <div class="toolbox-btn">5</div>
+        <div class="toolbox-btn">6</div>
     </div>
 </div>
 <div>
@@ -27,6 +25,8 @@
 
 <script type="text/javascript">
     $().ready(function() {
-        $('#')
+        $('#toolbox .toolbox-btn').click(function () {
+            $(this).addClass('toolbox-btn-pressed');
+        });
     });
 </script>

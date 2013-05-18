@@ -1,7 +1,18 @@
 ﻿
 
-.toolbox-button {
-    padding: 10px;
+.toolbox-btn {
+    padding: 20px;
     background-color: gray;
     border: 1px solid black;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 15pt;
+    margin-left:0px
+}
+.toolbox-btn:hover {
+    background-color:lightblue
+}
+
+.toolbox-btn-pressed {
+    background-color: blue;
 }
