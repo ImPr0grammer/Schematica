@@ -1,4 +1,4 @@
-﻿function WallTool(ctx) {
+﻿function WallTool(downCtx, upCtx) {
 
     function onclick(event) {
 
