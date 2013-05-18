@@ -2,17 +2,25 @@
 
 .toolbox-btn {
     padding: 20px;
-    background-color: gray;
-    border: 1px solid black;
+    border: 1px solid rgb(143, 140, 140);
     cursor: pointer;
     display: inline-block;
     font-size: 15pt;
     margin-left:0px
+}
+
+.empty-toolbox-btn {
+    padding: 20px;
+    border: 1px solid white;
 }
 .toolbox-btn:hover {
     background-color:lightblue
 }
 
 .toolbox-btn-pressed {
-    background-color: blue;
+    background-color: rgb(88, 88, 219) !important;
+}
+
+.toolbox {
+    padding: 0px 10px;
 }

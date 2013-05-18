@@ -5,28 +5,32 @@
 
 <h2>Редактор схемы</h2>
 
-<div id="toolbox" style="float:left">
+<div id="toolbox" class="toolbox" style="float:left">
     <div>
-        <div class="toolbox-btn">1</div>
-        <div class="toolbox-btn">2</div>
+        <div class="toolbox-btn" id="wall">1</div>
+        <div class="toolbox-btn" id="door">2</div>
     </div>
     <div>
-        <div class="toolbox-btn">3</div>
-        <div class="toolbox-btn">4</div>
+        <div class="toolbox-btn" id="pointInRoom">3</div>
+        <div class="toolbox-btn" id="coordPoint">4</div>
     </div>
     <div>
-        <div class="toolbox-btn">5</div>
-        <div class="toolbox-btn">6</div>
+        <div class="toolbox-btn" id="QRCode">5</div>
+        
     </div>
 </div>
 <div>
-    <canvas id="scheme"></canvas>
+    <canvas id="scheme" style="width:600px;height:400px;border:1px solid gray"></canvas>
 </div>
 
 <script type="text/javascript">
+    var _selectedInstrument = null;
     $().ready(function() {
         $('#toolbox .toolbox-btn').click(function () {
+            $('#toolbox .toolbox-btn').attr('class', 'toolbox-btn');
             $(this).addClass('toolbox-btn-pressed');
+
+            _selectedInstrument = $(this).attr('id');
         });
     });
 </script>
