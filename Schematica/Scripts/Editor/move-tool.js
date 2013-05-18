@@ -2,7 +2,8 @@
 
     var _movedPoint = null;
     var _selectedWallIndex = null;
-    var _moved = false;
+    var _moving = false;
+    var _nearSelection = false;
 
     this.click = function(point) {
 
@@ -11,27 +12,46 @@
     this.mouseDown = function (point) {
         clearAll(ctx.UpCtx, ctx.width, ctx.height);
         _movedPoint = findNearPoint(point, ctx.State, 20);
+        console.log('mouseDows', _movedPoint);
         if (_movedPoint)
             drawSelected(_movedPoint, ctx.UpCtx);
     };
 
     this.mouseUp = function (point) {
-        if (_moved && _movedPoint) {
+        if (_moving && _movedPoint) {
             movePoint(point, false);
         }
         
-        _moved = false; 
+        _moving = false; 
         _movedPoint = null;
-        // console.log('up: ' + event.x + ',' + event.y);
     };
 
     this.mouseMove = function (point) {
-        _moved = true;
+        if (_nearSelection) {
+            clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
+            ctx.UpCanvas.css('cursor', 'default');
+            _nearSelection = false;
+        }
+        _moving = true;
 
         if (_movedPoint) {
             movePoint(point, true);
+            _movedPoint = point;
+        } else {
+            var nearPoint = findNearPoint(point, ctx.State, 10);
+            if (nearPoint) {
+                drawSelected(nearPoint, ctx.UpCtx);
+                _nearSelection = true;
+                ctx.UpCanvas.css('cursor', 'pointer');
+                return;
+            }
+
+            var nearWall = findNearWall(point, ctx.State, 10);
+            if (nearWall) {
+                drawWallSelected(nearWall, ctx.UpCtx);
+                ctx.UpCanvas.css('cursor', 'pointer');
+            }
         }
-        //console.log('move: ' + event.x + ',' + event.y);
     };
 
     this.deActivate = function () {
@@ -41,7 +61,7 @@
     this.activate = function () {
     };
     
-    function movePoint(point, drawSelectedPoint) {
+    function movePoint(point, finished) {
         var walls = findWalls(_movedPoint, ctx.State);
         for (var i = 0; i < walls.length; ++i) {
             var wall = walls[i];
@@ -54,10 +74,10 @@
             }
 
             drawWall(wall, ctx.DownCtx);
-            
-            clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
-            if (drawSelectedPoint)
-                drawSelected(point, ctx.UpCtx);
         }
+
+        clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
+        if (!finished)
+            drawSelected(point, ctx.UpCtx);
     }
 }

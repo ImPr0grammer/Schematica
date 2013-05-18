@@ -37,6 +37,13 @@ function findWalls(point, state) {
     return result;
 }
 
+function findNearWall(point, state) {
+    for (var i = 0; i < state.findWalls.length; ++i) {
+        var wall = state.Walls[i];
+        
+    }
+}
+
 function drawWall(wall, ctx, color) {
     color = color || 'gray';
     ctx.beginPath();
@@ -47,7 +54,7 @@ function drawWall(wall, ctx, color) {
 }
 
 function unDrawWall(wall, ctx) {
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
     drawWall(wall, ctx, '#eee');
     ctx.lineWidth = 1;
 }

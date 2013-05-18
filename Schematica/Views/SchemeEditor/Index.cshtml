@@ -13,16 +13,28 @@
             Инструменты
         </div>
         <div>
-            <div class="toolbox-btn" id="wall" title="Стена">1</div>
-            <div class="toolbox-btn" id="room" title="Создать комнату">2</div>
+            <div class="toolbox-btn" id="wall" title="Стена">
+                <div class="wall-btn">&zwj;</div>
+            </div>
+            <div class="toolbox-btn" id="room" title="Создать комнату">
+                <div class="room-btn">&zwj;</div>
+            </div>
         </div>
         <div>
-            <div class="toolbox-btn" id="pointInRoom" title="Точка">3</div>
-            <div class="toolbox-btn" id="coordPoint" title="Точка с координатами">4</div>
+            <div class="toolbox-btn" id="pointInRoom" title="Точка в комнате">
+                <div class="location-btn">&zwj;</div>
+            </div>
+            <div class="toolbox-btn" id="coordPoint" title="Точка с координатами">
+                <div class="point-btn">&zwj;</div>
+            </div>
         </div>
         <div>
-            <div class="toolbox-btn" id="QRCode" title="QR-Code">5</div>
-            <div class="toolbox-btn" id="door" title="door">6</div>
+            <div class="toolbox-btn" id="QRCode" title="QR-Code">
+                <div class="qrcode-btn">&zwj;</div>
+            </div>
+            <div class="toolbox-btn" id="door" title="door">
+                <div class="door-btn">&zwj;</div>
+            </div>
         </div>
     
         <div style="margin-top:50px">
@@ -56,7 +68,7 @@
                 unPressed = true;
             }
 
-            $('#toolbox .toolbox-btn').attr('class', 'toolbox-btn');
+            $('#toolbox .toolbox-btn').removeClass('toolbox-btn-pressed');
 
             if (!unPressed) {
                 $(this).addClass('toolbox-btn-pressed');
@@ -83,7 +95,9 @@
             UpCtx: upCtx,
             State: _state,
             Width: 800,
-            Height: 500
+            Height: 500,
+            DownCanvas: $('#canvas'),
+            UpCanvas: $('#upCanvas')
         };
 
         _defaultTool = new MoveTool(toolContext);
