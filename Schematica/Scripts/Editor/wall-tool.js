@@ -1,52 +1,139 @@
 ﻿function WallTool(ctx) {
 
-    var radious = 10;
     var selectedPoint = null;
-
-    function addWall(from, to) {
-        if (!from)
-            return;
-
-        var wall = { From: from, To: to };
-        ctx.State.Walls.push(wall);
-        drawWall(wall, ctx.DownCtx);
-    }
+    var hoveredPoint = null;
+    var selectedWall = null;
+    var hoveredWall = null;
     
-    this.click = function (point) {
-        var foundPoint = findNearPoint(point, ctx.State, 2*radious);
+    this.keydown = function (event) {
+        if (event.keyCode == 27) {
+            if (selectedPoint)
+                ctx.Graph.deletePointIfCan(selectedPoint);
 
-        if (foundPoint) {
+            selectedPoint = null;
+            selectedWall = null;
+            redrawUp();
+        }
+        else if (event.keyCode == 46) {
             if (selectedPoint) {
-                addWall(selectedPoint, foundPoint);
+                ctx.Graph.deletePoint(selectedPoint);
+                redraw();
             }
-            selectedPoint = foundPoint;
-        } else {
-            addWall(selectedPoint, point);
-            selectedPoint = point;
+            if (selectedWall) {
+                ctx.Graph.deleteWall(selectedWall);
+                redraw();
+            }
+
+            selectedPoint = null;
+            selectedWall = null;
+        }
+        
+    };
+
+    this.click = function (point) {
+        var pointIdx;
+        selectedWall = null;
+        
+        if (selectedPoint == null) {
+            pointIdx = ctx.Graph.findNearPoint(point);
+            if (pointIdx < 0) {
+                // Если ничего не выделено и не навелись на точку, но навелись на стену
+                // То считаем, что выделили стену
+                selectedWall = ctx.Graph.findNearWall(point);
+                if (selectedWall) {
+                    redrawUp();
+                    return;
+                }
+            }
         }
 
+        pointIdx = ctx.Graph.getPointIndex(point);
+        
+        if (selectedPoint != null) {
+            ctx.Graph.addWall(selectedPoint, pointIdx, ctx);
+        }
+        selectedPoint = pointIdx;
+        redrawUp();
+    };
+    
+    function redraw() {
         clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
-        drawSelected(selectedPoint, ctx.UpCtx);
+        clearAll(ctx.DownCtx, ctx.Width, ctx.Height);
+        ctx.Graph.draw(ctx);
+    }
+
+    this.mouseDown = function(point) {
+        movingPoint = ctx.Graph.findNearPoint(point);
+        if (movingPoint >= 0) {
+            selectedWall = null;
+            hoveredPoint = movingPoint;
+        } else {
+            movingPoint = null;
+        }
     };
 
-    this.mouseDown = function(event) {
-     //   console.log('down: ' + event.x + ',' + event.y);
+    var movingPoint = null;
+    var moving = false;
+
+    this.mouseUp = function(point) {
+        if (moving && movingPoint) {
+            ctx.Graph.movePoint(movingPoint, point);
+            redraw();
+        }
+        moving = false;
+        movingPoint = null;
     };
 
-    this.mouseUp = function(event) {
-       // console.log('up: ' + event.x + ',' + event.y);
-    };
+    this.mouseMove = function(point) {
+        if ((hoveredPoint != null && hoveredPoint >= 0) || hoveredWall) {
+            ctx.UpCanvas.css('cursor', 'default');
+            hoveredPoint = null;
+            hoveredWall = null;
+            redrawUp();
+        }
+        moving = true;
 
-    this.mouseMove = function(event) {
-        //console.log('move: ' + event.x + ',' + event.y);
+        if (movingPoint) {
+            selectedPoint = null;
+            selectedWall = null;
+            ctx.Graph.movePoint(movingPoint, point);
+            redraw();
+            redrawUp();
+        } else {
+            hoveredPoint = ctx.Graph.findNearPoint(point);
+            if (hoveredPoint >= 0) {
+                ctx.UpCanvas.css('cursor', 'pointer');
+                redrawUp();
+                return;
+            } else {
+                hoveredPoint = null;
+            }
+
+            hoveredWall = ctx.Graph.findNearWall(point);
+            if (hoveredWall) {
+                ctx.UpCanvas.css('cursor', 'pointer');
+                redrawUp();
+                return;
+            } else {
+                hoveredWall = null;
+            }
+        }
     };
+    
+    function redrawUp() {
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+        ctx.Graph.drawSelected({ Point: selectedPoint, Wall: selectedWall }, ctx);
+        ctx.Graph.drawHovered({ Point: hoveredPoint, Wall: hoveredWall }, ctx);
+    }
 
     this.deActivate = function() {
         clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
         selectedPoint = null;
+        hoveredPoint = null;
+        selectedWall = null;
+        hoveredWall = null;
     };
 
     this.activate = function() {
     };
-
 }

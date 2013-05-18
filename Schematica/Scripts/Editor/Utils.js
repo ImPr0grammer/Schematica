@@ -1,23 +1,4 @@
-﻿function findNearPoint(point, state, radious) {
-    for (var i = 0; i < state.Walls.length; ++i) {
-        var from = state.Walls[i].From;
-        var to = state.Walls[i].To;
-        if (isNear(from, point, radious)) {
-            return from;
-        }
-
-        if (isNear(to, point, radious)) {
-            return to;
-        }
-    }
-
-    return null;
-}
-
-function isNear(point1, point2, radious) {
-    return sqr(point1.x - point2.x) + sqr(point1.y - point2.y) <= sqr(radious);
-}
-
+﻿
 function isEqualPoints(point1, point2) {
     return isNear(point1, point2, 5);
 }
@@ -90,19 +71,6 @@ function unDrawWall(wall, ctx) {
     ctx.lineWidth = 1;
 }
 
-function drawSelected(point, ctx, color) {
-    color = color || '#ADD8E6';
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.arc(point.x, point.y, 10, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
-}
-
-function drawHovered(point, ctx) {
-    drawSelected(point, ctx, '#BEE3FA');
-}
 
 function clearAll(ctx, width, height) {
     ctx.clearRect(0, 0, width, height);

@@ -28,7 +28,7 @@
     };
 
     this.click = function(point) {
-        _selectedWall = findNearWall(point, ctx.State, 10);
+        _selectedWall = findNearWall(point, ctx.State, 20);
         clearUp();
     };
     
