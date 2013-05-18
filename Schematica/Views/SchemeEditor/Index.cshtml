@@ -47,8 +47,8 @@
         <canvas id="canvas" width="800" height="500" style='background-color:#eee'></canvas>
     </div>
     
-    <div style="left:220px;bottom:0px;position:absolute;z-index:1px;width:800px;height:500px">
-        <canvas id="upCanvas" width="800" height="500"></canvas>
+    <div style="left:220px;bottom:5px;position:absolute;z-index:1px;width:800px;height:500px">
+        <canvas id="upCanvas" tabindex="1" width="800" height="500"></canvas>
     </div>
         
 </div>
@@ -107,7 +107,7 @@
     function bindEvents() {
         function onclick(event) {
             var coords = getCursorPosition(event);
-            if (_selectedTool)
+            if (_selectedTool && _selectedTool.click)
                 _selectedTool.click(coords);
         };
 
@@ -116,20 +116,27 @@
         
         $('#upCanvas').mousedown(function(event) {
             var coords = getCursorPosition(event);
-            if (_selectedTool)
+            if (_selectedTool && _selectedTool.mouseDown)
                 _selectedTool.mouseDown(coords);
         });
 
         $('#upCanvas').mouseup(function(event) {
             var coords = getCursorPosition(event);
-            if (_selectedTool)
+            if (_selectedTool && _selectedTool.mouseUp)
                 _selectedTool.mouseUp(coords);
         });
 
         $('#upCanvas').mousemove(function(event) {
             var coords = getCursorPosition(event);
-            if (_selectedTool)
+            if (_selectedTool && _selectedTool.mouseMove)
                 _selectedTool.mouseMove(coords);
+        });
+
+        $('#upCanvas').keydown(function (event) {
+            event.keyCode = event.keyCode ? event.keyCode : event.which;
+            if (_selectedTool && _selectedTool.keydown) {
+                _selectedTool.keydown(event);
+            }
         });
     }
 

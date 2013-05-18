@@ -1,20 +1,44 @@
 ﻿function MoveTool(ctx) {
 
     var _movedPoint = null;
-    var _selectedWallIndex = null;
+    var _selectedWall = null;
     var _moving = false;
     var _nearSelection = false;
 
-    this.click = function(point) {
+    this.deActivate = function () {
+        clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
+    };
 
+    this.activate = function () {
+    };
+
+    this.keydown = function (event) {
+        if (event.keyCode == 46 && _selectedWall) {
+            for (var i = 0; i < ctx.State.Walls.length; ++i) {
+                var wall = ctx.State.Walls[i];
+                if (isEqualPoints(wall.From, _selectedWall.From) && isEqualPoints(wall.To, _selectedWall.To)) {
+                    ctx.State.Walls.splice(i, 1);
+                    unDrawWall(wall, ctx.DownCtx);
+                    _selectedWall = null;
+                    clearUp();
+                    return;
+                }
+            }
+        }
+    };
+
+    this.click = function(point) {
+        _selectedWall = findNearWall(point, ctx.State, 10);
+        clearUp();
     };
     
     this.mouseDown = function (point) {
-        clearAll(ctx.UpCtx, ctx.width, ctx.height);
         _movedPoint = findNearPoint(point, ctx.State, 20);
-        console.log('mouseDows', _movedPoint);
-        if (_movedPoint)
+        if (_movedPoint) {
             drawSelected(_movedPoint, ctx.UpCtx);
+            _selectedWall = null;
+        }
+        clearUp();
     };
 
     this.mouseUp = function (point) {
@@ -28,7 +52,7 @@
 
     this.mouseMove = function (point) {
         if (_nearSelection) {
-            clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
+            clearUp();
             ctx.UpCanvas.css('cursor', 'default');
             _nearSelection = false;
         }
@@ -40,26 +64,28 @@
         } else {
             var nearPoint = findNearPoint(point, ctx.State, 10);
             if (nearPoint) {
-                drawSelected(nearPoint, ctx.UpCtx);
-                _nearSelection = true;
+                drawHovered(nearPoint, ctx.UpCtx);
                 ctx.UpCanvas.css('cursor', 'pointer');
+                _nearSelection = true;
                 return;
             }
 
             var nearWall = findNearWall(point, ctx.State, 10);
             if (nearWall) {
-                drawWallSelected(nearWall, ctx.UpCtx);
+                drawWallHovered(nearWall, ctx.UpCtx);
                 ctx.UpCanvas.css('cursor', 'pointer');
+                _nearSelection = true;
             }
         }
     };
-
-    this.deActivate = function () {
+    
+    function clearUp() {
         clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
-    };
+        if (_selectedWall) {
+            drawWallSelected(_selectedWall, ctx.UpCtx);
+        }
+    }
 
-    this.activate = function () {
-    };
     
     function movePoint(point, finished) {
         var walls = findWalls(_movedPoint, ctx.State);
@@ -76,7 +102,7 @@
             drawWall(wall, ctx.DownCtx);
         }
 
-        clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
+        clearUp();
         if (!finished)
             drawSelected(point, ctx.UpCtx);
     }

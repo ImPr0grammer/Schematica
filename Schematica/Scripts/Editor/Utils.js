@@ -16,10 +16,6 @@
 
 function isNear(point1, point2, radious) {
     return sqr(point1.x - point2.x) + sqr(point1.y - point2.y) <= sqr(radious);
-
-    function sqr(a) {
-        return a * a;
-    }
 }
 
 function isEqualPoints(point1, point2) {
@@ -38,10 +34,34 @@ function findWalls(point, state) {
 }
 
 function findNearWall(point, state) {
-    for (var i = 0; i < state.findWalls.length; ++i) {
+    for (var i = 0; i < state.Walls.length; ++i) {
         var wall = state.Walls[i];
-        
+        var wallLength = getWallLength(wall);
+        var area = getArea(point, wall.From, wall.To);
+        if (wallLength < 1e-3)
+            continue;
+
+        var dist = area / wallLength;
+        if (dist < 10)
+            return wall;
     }
+    return null;
+}
+
+function getWallLength(wall) {
+    var p = diff(wall.From, wall.To);
+    return Math.sqrt(sqr(p.x) + sqr(p.y));
+}
+
+function getArea(point1, point2, point3) {
+    var a = diff(point2, point1);
+    var b = diff(point3, point1);
+
+    return Math.abs(a.x * b.y - a.y * b.x);
+}
+
+function diff(point1, point2) {
+    return { x: point2.x - point1.x, y: point2.y - point1.y };
 }
 
 function drawWall(wall, ctx, color) {
@@ -53,24 +73,41 @@ function drawWall(wall, ctx, color) {
     ctx.stroke();
 }
 
+function drawWallSelected(wall, ctx, color) {
+    color = color || '#ADD8E6';
+    ctx.lineWidth = 4;
+    drawWall(wall, ctx, color);
+    ctx.lineWidth = 1;
+}
+
+function drawWallHovered(wall, ctx) {
+    drawWallSelected(wall, ctx, '#BEE3FA');
+}
+
 function unDrawWall(wall, ctx) {
     ctx.lineWidth = 4;
     drawWall(wall, ctx, '#eee');
     ctx.lineWidth = 1;
 }
 
-
-function clearAll(ctx, width, height) {
-    ctx.clearRect(0, 0, width, height);
-}
-
-function drawSelected(point, ctx) {
+function drawSelected(point, ctx, color) {
+    color = color || '#ADD8E6';
     ctx.beginPath();
-    ctx.strokeStyle = '#ADD8E6';
-    ctx.fillStyle = '#ADD8E6';
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
     ctx.arc(point.x, point.y, 10, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
 }
 
+function drawHovered(point, ctx) {
+    drawSelected(point, ctx, '#BEE3FA');
+}
 
+function clearAll(ctx, width, height) {
+    ctx.clearRect(0, 0, width, height);
+}
+
+function sqr(a) {
+    return a * a;
+}
