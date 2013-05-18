@@ -3,23 +3,26 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<script type="text/javascript" src="/Scripts/Editor/utils.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/wall-tool.js"></script>
+<script type="text/javascript" src="/Scripts/Editor/move-tool.js"></script>
 
-<div style="margin-top:40px">
-    <div id="toolbox" class="toolbox" style="float:left">
+<div id="mainPanel" style="margin-top:40px;position:relative">
+    <div id="toolbox" class="toolbox" style="float:left; width:200px">
         <div style="margin-bottom:10px;font-size:14pt;color:black;font-weight: bold">
             Инструменты
         </div>
         <div>
-            <div class="toolbox-btn" id="wall">1</div>
-            <div class="toolbox-btn" id="door">2</div>
+            <div class="toolbox-btn" id="wall" title="Стена">1</div>
+            <div class="toolbox-btn" id="room" title="Создать комнату">2</div>
         </div>
         <div>
-            <div class="toolbox-btn" id="pointInRoom">3</div>
-            <div class="toolbox-btn" id="coordPoint">4</div>
+            <div class="toolbox-btn" id="pointInRoom" title="Точка">3</div>
+            <div class="toolbox-btn" id="coordPoint" title="Точка с координатами">4</div>
         </div>
         <div>
-            <div class="toolbox-btn" id="QRCode">5</div>
+            <div class="toolbox-btn" id="QRCode" title="QR-Code">5</div>
+            <div class="toolbox-btn" id="door" title="door">6</div>
         </div>
     
         <div style="margin-top:50px">
@@ -28,27 +31,114 @@
             </div>
         </div>
     </div>
-    <div>
-        <div style="position: relative;">
-            <canvas id="layer1" width="100" height="100"
-                style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
-            <canvas id="layer2" width="100" height="100"
-                style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
-</div>
-
-        <canvas id="scheme" style="width:600px;height:400px;border:1px solid gray"></canvas>
+    <div id="canvasPanel" style='margin-top:20px'>
+        <canvas id="canvas" width="800" height="500" style='background-color:#eee'></canvas>
     </div>
     
-</div>    
+    <div style="left:220px;bottom:0px;position:absolute;z-index:1px;width:800px;height:500px">
+        <canvas id="upCanvas" width="800" height="500"></canvas>
+    </div>
+        
+</div>
 
 <script type="text/javascript">
-    var _selectedInstrument = null;
-    $().ready(function() {
-        $('#toolbox .toolbox-btn').click(function () {
-            $('#toolbox .toolbox-btn').attr('class', 'toolbox-btn');
-            $(this).addClass('toolbox-btn-pressed');
+    var _selectedTool = null;
+    $().ready(function () {
+        initTools();
+        bindEvents();
 
-            _selectedInstrument = $(this).attr('id');
+        $('#toolbox .toolbox-btn').click(function () {
+            var newTool = null;
+            var unPressed = false;
+            // если ничего не нажато, то работает инструмент по умолчанию
+            if ($(this).hasClass('toolbox-btn-pressed')) {
+                newTool = _defaultTool;
+                unPressed = true;
+            }
+
+            $('#toolbox .toolbox-btn').attr('class', 'toolbox-btn');
+
+            if (!unPressed) {
+                $(this).addClass('toolbox-btn-pressed');
+                var toolId = $(this).attr('id');
+                newTool = _idToTool[toolId];
+            }
+
+            // Отключаем предыдущий инструмент
+            if (_selectedTool)
+                _selectedTool.deActivate();
+
+            // Включаем выделенный инструмент
+            _selectedTool = newTool;
+            if (_selectedTool)
+                _selectedTool.activate();
         });
     });
+    
+    function initTools() {
+        var upCtx = document.getElementById('upCanvas').getContext('2d');
+        var downCtx = document.getElementById('canvas').getContext('2d');
+        var toolContext = {
+            DownCtx: downCtx,
+            UpCtx: upCtx,
+            State: _state,
+            Width: 800,
+            Height: 500
+        };
+
+        _defaultTool = new MoveTool(toolContext);
+        _idToTool['wall'] = new WallTool(toolContext);
+    }
+    
+    function bindEvents() {
+        function onclick(event) {
+            var coords = getCursorPosition(event);
+            if (_selectedTool)
+                _selectedTool.click(coords);
+        };
+
+        var upCanvas = document.getElementById('upCanvas');
+        upCanvas.addEventListener("click", function (event) { onclick(event); }, false);
+        
+        $('#upCanvas').mousedown(function(event) {
+            var coords = getCursorPosition(event);
+            if (_selectedTool)
+                _selectedTool.mouseDown(coords);
+        });
+
+        $('#upCanvas').mouseup(function(event) {
+            var coords = getCursorPosition(event);
+            if (_selectedTool)
+                _selectedTool.mouseUp(coords);
+        });
+
+        $('#upCanvas').mousemove(function(event) {
+            var coords = getCursorPosition(event);
+            if (_selectedTool)
+                _selectedTool.mouseMove(coords);
+        });
+    }
+
+    function getCursorPosition(e) {
+        var x;
+        var y;
+        if (e.pageX != undefined && e.pageY != undefined) {
+            x = e.pageX;
+            y = e.pageY;
+        } else {
+            x = e.clientX + document.body.scrollLeft +
+                document.documentElement.scrollLeft;
+            y = e.clientY + document.body.scrollTop +
+                document.documentElement.scrollTop;
+        }
+        x -= $('#upCanvas').offset().left;
+        y -= $('#upCanvas').offset().top;
+
+        return { x: x, y: y };
+    }
+
+    var _defaultTool = null;
+    var _idToTool = {};
+    var _state = { Walls: [] };
+
 </script>
