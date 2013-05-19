@@ -30,10 +30,10 @@
         
     };
 
-    this.click = function (point) {
+    this.click = function(point) {
         var pointIdx;
         selectedWall = null;
-        
+
         if (selectedPoint == null) {
             pointIdx = ctx.Graph.findNearPoint(point);
             if (pointIdx < 0) {
@@ -48,17 +48,17 @@
         }
 
         pointIdx = ctx.Graph.getPointIndex(point);
-        
+
         if (selectedPoint != null) {
             ctx.Graph.addWall(selectedPoint, pointIdx, ctx);
         }
         selectedPoint = pointIdx;
         redrawUp();
     };
-    
+
     function redraw() {
-        clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
-        clearAll(ctx.DownCtx, ctx.Width, ctx.Height);
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+        ctx.DownCtx.clearRect(0, 0, ctx.Width, ctx.Height);
         ctx.Graph.draw(ctx);
     }
 
@@ -127,7 +127,7 @@
     }
 
     this.deActivate = function() {
-        clearAll(ctx.UpCtx, ctx.Width, ctx.Height);
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
         selectedPoint = null;
         hoveredPoint = null;
         selectedWall = null;

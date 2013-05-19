@@ -2,11 +2,12 @@
     ViewBag.Title = "title";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<script type="text/javascript" src="/Scripts/Editor/utils.js"></script>
+<script type="text/javascript" src="/Scripts/Editor/utils.js"></script> 
 <script type="text/javascript" src="/Scripts/Editor/wall-tool.js"></script>
+<script type="text/javascript" src="/Scripts/Editor/room-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/move-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/SchemeGraph.js"></script>
+<script type="text/javascript" src="/Scripts/Editor/popup.js"></script>
 
 <div id="mainPanel" style="margin-top:40px;position:relative">
     <div id="toolbox" class="toolbox" style="float:left; width:200px">
@@ -48,7 +49,7 @@
         <canvas id="canvas" width="800" height="500" style='background-color:#eee'></canvas>
     </div>
     
-    <div style="left:220px;bottom:5px;position:absolute;z-index:1px;width:800px;height:500px">
+    <div style="left:220px;bottom:5px;position:absolute;z-index:1;width:800px;height:500px">
         <canvas id="upCanvas" class="canvas" tabindex="1" width="800" height="500"></canvas>
     </div>
 </div>
@@ -92,7 +93,7 @@
         };
 
         _selectedTool = _idToTool['wall'] = new WallTool(toolContext);
-        
+        _idToTool['room'] = new RoomTool(toolContext);
     }
     
     function bindEvents() {
@@ -151,5 +152,4 @@
 
     var _idToTool = {};
     var _state = { Walls: [] };
-
 </script>

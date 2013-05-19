@@ -3,9 +3,10 @@
     var graph = {};
 
     var radious = 10;
-
     var freeIndexes = [];
 
+/* --------- Добавление и удаление точек и стен -------------*/
+    
     this.addWall = function(fromIdx, toIdx, ctx) {
         function addToGraph(fromIndex, toIndex) {
             var row = graph[fromIndex];
@@ -195,8 +196,6 @@
         return sqr(point1.x - point2.x) + sqr(point1.y - point2.y) <= sqr(radious);
     }
     
-
-
     /* ---------- Drawing ----------------- */
 
     this.draw = function (ctx) {
@@ -277,5 +276,126 @@
         ctx.lineTo(points[to].x, points[to].y);
         ctx.stroke();
     }
+    
 
+/* ---------------- Поиск замкнутого контура ------------------*/
+
+    this.findContour = function(point) {
+        for (var i = 0; i < points.length; ++i) {
+            var startPoint = points[i];
+            if (!startPoint)
+                continue;
+
+            var calculator = new ContourCalculator();
+            var contour = generateContours(point, i, calculator);
+            if (contour)
+                return contour;
+        }
+
+        function generateContours(lastPoint, curPointIdx, holder) {
+            var disjoint = graph[curPointIdx];
+            if (!disjoint)
+                return null;
+        
+            // Нашли цикл
+            if (holder.isVisited(curPointIdx)) {
+                var contourIds = holder.getContour(curPointIdx);
+                var isIn = isInContour(contourIds, point);
+                if (isIn)
+                    return contourIds;
+                return false;
+            }
+            holder.addPoint(curPointIdx);
+
+            // Находим точку с максимальным уголом
+            var next = [];
+            for (var toIdx in disjoint) {
+                if (!disjoint.hasOwnProperty(toIdx))
+                    continue;
+
+                if (!graph[curPointIdx][toIdx])
+                    continue;
+
+                var angle = getAngle(lastPoint, points[curPointIdx], points[toIdx]);
+                if (angle != null) {
+                    next.push({ Idx: toIdx, Angle: angle });
+                }
+            }
+
+            next.sort(function(a, b) {
+                if (a.Angle < b.Angle)
+                    return 1;
+                else if (a.Angle > b.Angle)
+                    return - 1;
+                return 0;
+            });
+            
+            for (var j = 0; j < next.length; ++j) {
+                var nextIdx = next[j].Idx;
+
+                graph[curPointIdx][nextIdx] = 0;
+                graph[nextIdx][curPointIdx] = 0;
+                var result = generateContours(points[curPointIdx], nextIdx, holder);
+                graph[curPointIdx][nextIdx] = 1;
+                graph[nextIdx][curPointIdx] = 1;
+
+                if (result != null)
+                    return result;
+            }
+
+            return false;
+        }
+    };
+    
+    function isInContour(pointIdxes, testPoint) {
+        
+        var count = 0;
+        for (var i = 0; i < pointIdxes.length; ++i) {
+            var idx = pointIdxes[i];
+            var nextIdx = pointIdxes[(i + 1) % pointIdxes.length];
+            var point = points[idx];
+            var nextPoint = points[nextIdx];
+            var from = getDiff(point, testPoint);
+            var to = getDiff(nextPoint, testPoint);
+
+            if (Math.abs(from.x - to.x) < 1e-10) {
+                if (Math.max(from.y, to.y) >= 0) {
+                    count++;
+                }
+                continue;
+            }
+
+            var zeroY = (from.y * (to.x - from.x) + from.x * (from.y - to.y)) / (to.x - from.x);
+
+            if (zeroY >= 0)
+                count++;
+        }
+
+        var result = count % 2 == 1;
+        return result;
+    }
+    
+    function ContourCalculator() {
+        var stack = [];
+        var visited = {};
+
+        this.isVisited = function(idx) {
+            return visited[idx];
+        };
+
+        this.addPoint = function(idx) {
+            stack.push(idx);
+            visited[idx] = 1;
+        };
+
+        this.getContour = function(idx) {
+            var result = [];
+            for (var i = stack.length - 1; i >= 0; --i) {
+                result.push(stack[i]);
+                if (stack[i] == idx)
+                    return result;
+            }
+            return null;
+        };
+    }
 }

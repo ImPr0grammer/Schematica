@@ -13,6 +13,17 @@
     color: steelblue;
 }
 
+.common-btn {
+    padding: 15px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 15pt;
+    background-color: #ECECEC;
+    color: steelblue;
+}
+
+.common-input {width:250px}
+
 .toolbox-btn > div { width: 50px;height: 50px; background-repeat: no-repeat}
 
 /* wall */
@@ -70,11 +81,11 @@
     border: 1px solid white;
 }
 
-.toolbox-btn:hover {
+.toolbox-btn:hover, .common-btn:hover {
     background-color: #BEE3FA;
     color: rgb(116, 115, 115);
 }
-.toolbox-btn-pressed {
+.toolbox-btn-pressed, .common-btn:active {
     background-color: #ADD8E6 !important;
     color: black !important;
 }
@@ -96,3 +107,17 @@
 .scheme-image:hover { background-color: #BEE3FA}
 
 .canvas { outline: none !important}
+
+.popup-wrapper {
+    cursor:pointer;z-index:1000;position:absolute;top:0px;left: 0px;width:100%;height: 100%;
+        text-align:center;
+}
+
+.opacity-wrapper {
+    opacity: 0.3;width:100%;height:100%;background-color: gray
+}
+
+.label {
+    min-width: 100px;
+    display: inline-block;
+}

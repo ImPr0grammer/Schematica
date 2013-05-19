@@ -1,79 +1,42 @@
 ﻿
-function isEqualPoints(point1, point2) {
-    return isNear(point1, point2, 5);
-}
 
-function findWalls(point, state) {
-    var result = [];
-    for (var i = 0; i < state.Walls.length; ++i) {
-        var wall = state.Walls[i];
-        if (isEqualPoints(wall.From, point) || isEqualPoints(wall.To, point)) {
-            result.push(wall);
-        }
+// Угол можеду (point1, point2) и (point2, point3)
+function getAngle(point1, point2, point3) {
+    if (pointEquals(point1, point2) || pointEquals(point2, point3)) {
+        return null;
     }
+
+    var w12 = getDiff(point2, point1);
+    var w23 = getDiff(point3, point2);
+    var len12 = len(w12);
+    var len23 = len(w23);
+
+    var cos = scalarMul(w12, w23) / (len12 * len23);
+    var sin = vectMul(w12, w23) / (len12 * len23);
+
+    var result = Math.atan2(sin, cos);
     return result;
 }
 
-function findNearWall(point, state) {
-    for (var i = 0; i < state.Walls.length; ++i) {
-        var wall = state.Walls[i];
-        var wallLength = getWallLength(wall);
-        var area = getArea(point, wall.From, wall.To);
-        if (wallLength < 1e-3)
-            continue;
-
-        var dist = area / wallLength;
-        if (dist < 10)
-            return wall;
-    }
-    return null;
+function vectMul(a, b) {
+    return a.x * b.y - a.y * b.x;
 }
 
-function getWallLength(wall) {
-    var p = diff(wall.From, wall.To);
-    return Math.sqrt(sqr(p.x) + sqr(p.y));
+function scalarMul(a, b) {
+    return a.x * b.x + a.y * b.y;
 }
 
-function getArea(point1, point2, point3) {
-    var a = diff(point2, point1);
-    var b = diff(point3, point1);
-
-    return Math.abs(a.x * b.y - a.y * b.x);
-}
-
-function diff(point1, point2) {
+function getDiff(point1, point2) {
     return { x: point2.x - point1.x, y: point2.y - point1.y };
 }
 
-function drawWall(wall, ctx, color) {
-    color = color || 'gray';
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.moveTo(wall.From.x, wall.From.y);
-    ctx.lineTo(wall.To.x, wall.To.y);
-    ctx.stroke();
+function pointEquals(point1, point2) {
+    return (Math.abs(point2.x - point1.x) <= 1e-10)
+        && (Math.abs(point2.y - point1.y) <= 1e-10);
 }
 
-function drawWallSelected(wall, ctx, color) {
-    color = color || '#ADD8E6';
-    ctx.lineWidth = 4;
-    drawWall(wall, ctx, color);
-    ctx.lineWidth = 1;
-}
-
-function drawWallHovered(wall, ctx) {
-    drawWallSelected(wall, ctx, '#BEE3FA');
-}
-
-function unDrawWall(wall, ctx) {
-    ctx.lineWidth = 4;
-    drawWall(wall, ctx, '#eee');
-    ctx.lineWidth = 1;
-}
-
-
-function clearAll(ctx, width, height) {
-    ctx.clearRect(0, 0, width, height);
+function len(point) {
+    return Math.sqrt(sqr(point.y) + sqr(point.x));
 }
 
 function sqr(a) {
