@@ -16,11 +16,11 @@
         }
         else if (event.keyCode == 46) {
             if (selectedPoint) {
-                ctx.Graph.deletePoint(selectedPoint);
+                ctx.Graph.deletePoint(selectedPoint, ctx);
                 redraw();
             }
             if (selectedWall) {
-                ctx.Graph.deleteWall(selectedWall);
+                ctx.Graph.deleteWall(selectedWall, ctx);
                 redraw();
             }
 
@@ -77,7 +77,7 @@
 
     this.mouseUp = function(point) {
         if (moving && movingPoint) {
-            ctx.Graph.movePoint(movingPoint, point);
+            ctx.Graph.movePoint(movingPoint, {x: Math.floor(point.x / 10) * 10, y: Math.floor(point.y / 10) * 10});
             redraw();
         }
         moving = false;

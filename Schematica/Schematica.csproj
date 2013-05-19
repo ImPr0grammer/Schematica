@@ -227,6 +227,7 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <None Include="Scripts\jquery-1.7.1.intellisense.js" />
+    <Content Include="Images\schema.jpeg" />
     <Content Include="Images\Toolbox\door-b.png" />
     <Content Include="Images\Toolbox\door.png" />
     <Content Include="Images\Toolbox\location-b.png" />

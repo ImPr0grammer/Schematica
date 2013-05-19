@@ -8,7 +8,29 @@
     };
 
     this.deActivate = function() {
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+        
+    };
 
+    var hoverContourKey = null;
+    this.mouseMove = function (point) {
+        var contour = ctx.Graph.findContour(point);
+        if (contour) {
+            var newKey = getContourKey(contour);
+            if (newKey in ctx.Rooms) {
+                if (newKey != hoverContourKey) {
+                    ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+                    ctx.Graph.highlightContour(contour, ctx);
+                    hoverContourKey = newKey;
+                }
+
+                ctx.UpCanvas.css('cursor', 'pointer');
+                return;
+            }
+        }
+        ctx.UpCanvas.css('cursor', 'default');
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+        hoverContourKey = null;
     };
 
     this.click = function (point) {
@@ -34,6 +56,11 @@
                 '<div style="text-align:right"><div id="savePoint" class="common-btn">Сохранить</div></div>' +
                 '</div>');
         var popup = new Popup(400, 200 + (_isQRCode ? 60 : 0), content);
+        popup.bindKeyDown(function(event) {
+            if (event.keyCode == 13) {
+                $('#savePoint').click();
+            }
+        });
 
         content.find('#pointName').focus();
         content.find('#savePoint').click(function () {

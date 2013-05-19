@@ -1,6 +1,6 @@
 ﻿
 function Popup(width, height, content) {
-    var panel = $('<div>&zwj;</div>')
+    var panel = $('<div tabindex="1">&zwj;</div>')
         .css('width', width)
         .css('height', height)
         .css('margin', '100px auto')
@@ -10,7 +10,22 @@ function Popup(width, height, content) {
         .css('position', 'absolute')
         .css('margin-left', '-200px')
         .css('top','100px');
+
+
+    var _handler = null;
+    this.bindKeyDown = function(handler) {
+        _handler = handler;
+    };
     
+    panel.keydown(function (event) {
+        event.keyCode = event.keyCode ? event.keyCode : event.which;
+        if (event.keyCode == 27)
+            closePopup();
+
+        if (_handler)
+            _handler(event);
+    });
+
     panel.click(function(event) {
         event.stopPropagation();
     });

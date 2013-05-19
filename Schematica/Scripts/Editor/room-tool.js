@@ -5,7 +5,22 @@
     };
 
     this.deActivate = function() {
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.height);
+    };
 
+    var hoverContourKey = null;
+    this.mouseMove = function (point) {
+        var contour = ctx.Graph.findContour(point);
+        if (contour) {
+            var newKey = getContourKey(contour);
+            if (newKey != hoverContourKey) {
+                ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+                ctx.Graph.highlightContour(contour, ctx);
+            }
+        } else {
+            hoverContourKey = null;
+            ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
+        }
     };
 
     this.click = function(point) {
@@ -25,7 +40,12 @@
                 '<div style="text-align:right"><div id="saveRoom" class="common-btn">Сохранить</div></div>'+
                 '</div>');
             var popup = new Popup(400, 260, content);
-            
+            popup.bindKeyDown(function(event) {
+                if (event.keyCode == 13) {
+                    $('#saveRoom').click();
+                }
+            });
+
             if (room) {
                 content.find('#roomName').val(room.Name);
                 content.find('#roomColor').val(room.Color);
@@ -38,7 +58,7 @@
                     return;
                 }
 
-                room = { Contour: contour, Name: name, Color: color, Items: [] };
+                room = { Contour: contour, Name: name, Color: color, Items: [], Id:contourKey };
                 ctx.Rooms[contourKey] = room;
 
                 closePopup();

@@ -53,11 +53,11 @@
             <div id="saveScheme" style="width:170px" class="common-btn">Сохранить</div>
         </div>
     </div>
-    <div id="canvasPanel" style='margin-top:20px'>
-        <canvas id="canvas" width="800" height="500" style='background-color:#eee'></canvas>
+    <div id="canvasPanel" style='margin-left:220px;margin-top:20px;background:url("/Images/schema.jpeg") no-repeat'>
+        <canvas id="canvas" width="800" height="500" ></canvas>
     </div>
     
-    <div style="left:220px;bottom:5px;position:absolute;z-index:1;width:800px;height:500px">
+    <div style="left:220px;bottom:4px;position:absolute;z-index:1;width:800px;height:500px">
         <canvas id="upCanvas" class="canvas" tabindex="1" width="800" height="500"></canvas>
     </div>
 </div>
@@ -215,6 +215,9 @@
     
     function convertFromServer(data) {
         toolContext.Doors = data.doors;
+        if (!toolContext.Doors) {
+            toolContext.Doors = [];
+        }
 
         for (var i = 0; i < data.rooms.length; ++i) {
             var roomInfo = data.rooms[i];
@@ -241,7 +244,8 @@
                 Name: roomInfo.title,
                 Color: roomInfo.color,
                 Contour: contour,
-                Items:{}
+                Id: roomInfo.id,
+                Items:[]
             };
             toolContext.Rooms[roomInfo.id] = room;
         }
@@ -259,10 +263,9 @@
                 item.y = coords[1];
             }
 
-            room.items.push(item);
+            room.Items.push(item);
         }
     }
-    
     
     function initData() {
         convertFromServer(serverData);
@@ -276,7 +279,7 @@
                 });
         });
     }
-
+        
     @if (!String.IsNullOrEmpty(ViewBag.Scheme))
     {
         @:var serverData = @Html.Raw(ViewBag.Scheme)

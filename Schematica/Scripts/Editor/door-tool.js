@@ -4,7 +4,7 @@
     };
 
     this.deActivate = function() {
-
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
     };
 
     this.click = function(point) {
@@ -15,6 +15,7 @@
                 selectedWall = null;
             } else {
                 createDoor(selectedWall);
+                hoveredWall = null;
             }
         }
 
@@ -36,8 +37,9 @@
 
         hoveredWall = ctx.Graph.findNearWall(point);
         if (hoveredWall) {
+
             var rooms = ctx.Graph.filterRooms(ctx.Rooms, hoveredWall);
-            if (rooms.length < 2)
+            if (!rooms || rooms.length < 2)
                 hoveredWall = null;
         }
 

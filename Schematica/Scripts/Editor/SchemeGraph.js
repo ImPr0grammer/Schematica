@@ -1,22 +1,23 @@
-﻿SchemeGraph = function () {
+﻿SchemeGraph = function() {
     var points = [];
     var graph = {};
 
     var radious = 10;
     var freeIndexes = [];
 
-/* --------- Добавление и удаление точек и стен -------------*/
-    
+    /* --------- Добавление и удаление точек и стен -------------*/
+
     this.addWall = function(fromIdx, toIdx, ctx) {
+
         function addToGraph(fromIndex, toIndex) {
             var row = graph[fromIndex];
             if (!row) {
                 row = {};
                 graph[fromIndex] = row;
             }
-            
+
             row[toIndex] = 1;
-            
+
             points[fromIndex].used++;
         }
 
@@ -24,7 +25,7 @@
         var disjoint = graph[toIdx];
         if (disjoint && disjoint[fromIdx] == 1)
             return { From: fromIdx, To: toIdx };
-        
+
         // граф не ориентированный
         addToGraph(fromIdx, toIdx);
         addToGraph(toIdx, fromIdx);
@@ -35,11 +36,29 @@
         return { From: fromIdx, To: toIdx };
     };
 
-    this.deleteWall = function(wall) {
-        doDeleteWall(wall);
+    this.deleteWall = function(wall, ctx) {
+        doDeleteWall(wall, ctx);
     };
-    
-    function doDeleteWall(wall) {
+
+    function doDeleteWall(wall, ctx) {
+        var nearRooms = doFilterRooms(ctx.Rooms, wall);
+        if (nearRooms.length > 0) {
+            var deleted = '';
+            for (var i = 0; i < nearRooms.length; ++i) {
+                if (i > 0)
+                    deleted += ', ';
+                deleted = deleted + '"' + nearRooms[i].Name + '"';
+            }
+
+            if (!confirm('Внимание будут удалены комнаты:' + deleted + ', продолжить?'))
+                return;
+        }
+
+        for (i = 0; i < nearRooms.length; ++i) {
+            var room = nearRooms[i];
+            delete ctx.Rooms[room.Id];
+        }
+
         var fromIdx = wall.From;
         var toIdx = wall.To;
 
@@ -54,7 +73,7 @@
         deleteFromGraph(toIdx, fromIdx);
     }
 
-    this.deletePoint = function(pointIdx) {
+    this.deletePoint = function(pointIdx, ctx) {
         var disjoint = graph[pointIdx];
         if (disjoint) {
             var toDelete = [];
@@ -63,9 +82,9 @@
                     toDelete.push(toIdx);
                 }
             }
-            
+
             for (var i = 0; i < toDelete.length; ++i) {
-                doDeleteWall({ From: pointIdx, To: toDelete[i] });
+                doDeleteWall({ From: pointIdx, To: toDelete[i] }, ctx);
             }
         }
 
@@ -76,7 +95,7 @@
         var point = points[pointIdx];
         if (point == null)
             return;
-        
+
         if (points[pointIdx].used == 0) {
             points[pointIdx] = null;
             freeIndexes.push(pointIdx);
@@ -92,7 +111,7 @@
         var result = [];
         if (!row)
             return result;
-        
+
         for (var k in row) {
             if (row.hasOwnProperty(k)) {
                 var value = row[k];
@@ -112,7 +131,7 @@
             if (!points[i])
                 continue;
 
-            if (isNear(points[i], point, 2*radious))
+            if (isNear(points[i], point, 2 * radious))
                 return i;
         }
         // добавляем
@@ -126,16 +145,18 @@
 
         // Новый индекс
         var idx = points.length;
-        points.push({ x: point.x, y: point.y, used: 0 });
+        points.push({ x: Math.round(point.x / 10) * 10, y: Math.round(point.y / 10) * 10, used: 0 });
         return idx;
-    };
+    }
+
+    ;
 
     this.findNearPoint = function(point) {
         for (var i = 0; i < points.length; ++i) {
             var forTest = points[i];
             if (!forTest)
                 continue;
-            
+
             if (isNear(point, forTest, 20)) {
                 return i;
             }
@@ -166,10 +187,10 @@
             for (var toIdx in disjoint) {
                 if (!disjoint.hasOwnProperty(toIdx))
                     continue;
-                
+
                 var wall = { From: i, To: parseInt(toIdx) };
                 var wallLength = getWallLength(wall);
-                
+
                 var area = getArea(point, points[wall.From], points[wall.To]);
                 if (wallLength < 1e-3)
                     continue;
@@ -187,7 +208,7 @@
 
                 if (point.y > Math.max(points[wall.From].y, points[wall.To].y) + radious)
                     continue;
-                
+
                 if (point.y < Math.min(points[wall.From].y, points[wall.To].y) - radious)
                     continue;
 
@@ -196,7 +217,7 @@
         }
         return null;
     };
-    
+
     function getWallLength(wall) {
         var p = diff(points[wall.From], points[wall.To]);
         return Math.sqrt(sqr(p.x) + sqr(p.y));
@@ -220,10 +241,10 @@
     function isNear(point1, point2, radious) {
         return sqr(point1.x - point2.x) + sqr(point1.y - point2.y) <= sqr(radious);
     }
-    
+
     /* ---------- Drawing ----------------- */
 
-    this.draw = function (ctx) {
+    this.draw = function(ctx) {
         ctx.DownCtx.clearRect(0, 0, ctx.Width, ctx.Height);
         ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
 
@@ -237,11 +258,11 @@
             var disjoint = graph[i];
             if (!disjoint)
                 continue;
-            
+
             for (var toIdx in disjoint) {
                 if (!disjoint.hasOwnProperty(toIdx))
                     continue;
-                
+
                 if (fromIdx >= toIdx)
                     continue;
 
@@ -250,7 +271,7 @@
         }
     };
 
-    this.drawSelected = function (selected, ctx) {
+    this.drawSelected = function(selected, ctx) {
         if (!selected)
             return;
 
@@ -263,7 +284,7 @@
         }
     };
 
-    this.drawHovered = function (hovered, ctx) {
+    this.drawHovered = function(hovered, ctx) {
         if (!hovered)
             return;
 
@@ -294,16 +315,17 @@
     }
 
     function drawWall(from, to, ctx, color) {
-        color = color || 'gray';
+        color = color || 'yellow';
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.strokeStyle = color;
         ctx.moveTo(points[from].x, points[from].y);
         ctx.lineTo(points[to].x, points[to].y);
         ctx.stroke();
     }
-    
 
-/* ---------------- Поиск замкнутого контура ------------------*/
+
+    /* ---------------- Поиск замкнутого контура ------------------*/
 
     this.findContour = function(point) {
         for (var i = 0; i < points.length; ++i) {
@@ -321,7 +343,7 @@
             var disjoint = graph[curPointIdx];
             if (!disjoint)
                 return null;
-        
+
             // Нашли цикл
             if (holder.isVisited(curPointIdx)) {
                 var contourIds = holder.getContour(curPointIdx);
@@ -351,10 +373,10 @@
                 if (a.Angle < b.Angle)
                     return 1;
                 else if (a.Angle > b.Angle)
-                    return - 1;
+                    return -1;
                 return 0;
             });
-            
+
             for (var j = 0; j < next.length; ++j) {
                 var nextIdx = next[j].Idx;
 
@@ -371,9 +393,9 @@
             return false;
         }
     };
-    
+
     function isInContour(pointIdxes, testPoint) {
-        
+
         var count = 0;
         for (var i = 0; i < pointIdxes.length; ++i) {
             var idx = pointIdxes[i];
@@ -397,7 +419,7 @@
 
             if (Math.max(from.x, to.x) < -1e-10)
                 continue;
-            
+
             if (Math.min(from.x, to.x) > 1e-10)
                 continue;
             count++;
@@ -406,7 +428,7 @@
         var result = count % 2 == 1;
         return result;
     }
-    
+
     function ContourCalculator() {
         var stack = [];
         var visited = {};
@@ -431,33 +453,45 @@
         };
     }
 
-    this.highlightContour = function(contour, ctx) {
-        for (var i = 0; i < contour.length; ++i) {
-            var fromIdx = contour[i];
-            var toIdx = contour[(i + 1) % contour.length];
-            ctx.Graph.drawSelected({
-                Wall: { From: fromIdx, To: toIdx }
-            }, ctx);
+    this.highlightContour = function(contour, ctx, color) {
+        color = color || 'rgba(214,238,253, 0.5)';
+        ctx.UpCtx.beginPath();
+        ctx.UpCtx.moveTo(points[0].x, points[0].y);
+        ctx.UpCtx.strokeStyle = color;
+        
+        for (var i = 0; i <= contour.length; ++i) {
+            var to = contour[(i + 1) % contour.length];
+
+            ctx.UpCtx.lineTo(points[to].x, points[to].y);
+            ctx.UpCtx.stroke();
         }
+        
+        ctx.UpCtx.fillStyle = color;
+        ctx.UpCtx.fill();
     };
 
     this.filterRooms = function (rooms, wall) {
+        return doFilterRooms(rooms, wall);
+    };
+
+    function doFilterRooms(rooms, wall) {
         var result = [];
         for (var k in rooms) {
             if (!rooms.hasOwnProperty(k))
                 continue;
-            
+
             var room = rooms[k];
             for (var j = 0; j <= room.Contour.length; ++j) {
-                var curIdx = room.Contour[j];
+                var curIdx = room.Contour[j % room.Contour.length];
                 var nextIdx = room.Contour[(j + 1) % room.Contour.length];
 
-                if ((curIdx == wall.From && nextIdx == wall.To)
-                    || (curIdx == wall.To && nextIdx == wall.From)) {
+                if ((curIdx == parseInt(wall.From) && nextIdx == parseInt(wall.To))
+                    || (curIdx == parseInt(wall.To) && nextIdx == parseInt(wall.From))) {
                     result.push(room);
                 }
             }
+
         }
         return result;
-    };
-}
+    }
+};
