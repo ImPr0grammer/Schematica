@@ -7,6 +7,7 @@
 <script type="text/javascript" src="/Scripts/Editor/room-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/move-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/point-tool.js"></script>
+<script type="text/javascript" src="/Scripts/Editor/door-tool.js"></script>
 
 <script type="text/javascript" src="/Scripts/Editor/SchemeGraph.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/popup.js"></script>
@@ -100,6 +101,7 @@
         _idToTool['pointInRoom'] = new PointTool(toolContext);
         _idToTool['coordPoint'] = new PointTool(toolContext);
         _idToTool['QRCode'] = new PointTool(toolContext);
+        _idToTool['door'] = new DoorTool(toolContext);
     }
     
     function bindEvents() {

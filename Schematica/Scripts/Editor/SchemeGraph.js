@@ -156,8 +156,8 @@
             for (var toIdx in disjoint) {
                 if (!disjoint.hasOwnProperty(toIdx))
                     continue;
-
-                var wall = { From: i, To: toIdx };
+                
+                var wall = { From: i, To: parseInt(toIdx) };
                 var wallLength = getWallLength(wall);
                 
                 var area = getArea(point, points[wall.From], points[wall.To]);
@@ -407,5 +407,25 @@
                 Wall: { From: fromIdx, To: toIdx }
             }, ctx);
         }
+    };
+
+    this.filterRooms = function (rooms, wall) {
+        var result = [];
+        for (var k in rooms) {
+            if (!rooms.hasOwnProperty(k))
+                continue;
+            
+            var room = rooms[k];
+            for (var j = 0; j <= room.Contour.length; ++j) {
+                var curIdx = room.Contour[j];
+                var nextIdx = room.Contour[(j + 1) % room.Contour.length];
+
+                if ((curIdx == wall.From && nextIdx == wall.To)
+                    || (curIdx == wall.To && nextIdx == wall.From)) {
+                    result.push(room);
+                }
+            }
+        }
+        return result;
     };
 }
