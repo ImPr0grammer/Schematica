@@ -239,7 +239,12 @@
     <Content Include="Images\Toolbox\room.png" />
     <Content Include="Images\Toolbox\wall-b.png" />
     <Content Include="Images\Toolbox\wall.png" />
+    <Content Include="Scripts\Editor\door-tool.js" />
     <Content Include="Scripts\Editor\move-tool.js" />
+    <Content Include="Scripts\Editor\point-tool.js" />
+    <Content Include="Scripts\Editor\popup.js" />
+    <Content Include="Scripts\Editor\room-tool.js" />
+    <Content Include="Scripts\Editor\SchemeGraph.js" />
     <Content Include="Scripts\Editor\Utils.js" />
     <Content Include="Scripts\Editor\wall-tool.js" />
     <Content Include="Scripts\jquery-1.7.1.js" />

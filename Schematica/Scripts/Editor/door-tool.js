@@ -49,7 +49,7 @@
     };
     
     function redrawUp() {
-        ctx.UpCtx.clearRect(0, 0, ctx.width, ctx.height);
+        ctx.UpCtx.clearRect(0, 0, ctx.Width, ctx.Height);
         ctx.Graph.drawSelected({ Wall: selectedWall }, ctx);
         ctx.Graph.drawHovered({ Wall: hoveredWall }, ctx);
     }

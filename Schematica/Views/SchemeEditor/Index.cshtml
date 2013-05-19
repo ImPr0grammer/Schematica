@@ -2,6 +2,7 @@
     ViewBag.Title = "title";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<script type="text/javascript" src="/Scripts/jquery.unobtrusive-ajax.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/utils.js"></script> 
 <script type="text/javascript" src="/Scripts/Editor/wall-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/room-tool.js"></script>
@@ -47,6 +48,10 @@
                 &darr; Изображение схемы
             </div>
         </div>
+        
+        <div style="margin-top:20px;text-align: center">
+            <div id="saveScheme" style="width:170px" class="common-btn">Сохранить</div>
+        </div>
     </div>
     <div id="canvasPanel" style='margin-top:20px'>
         <canvas id="canvas" width="800" height="500" style='background-color:#eee'></canvas>
@@ -79,12 +84,15 @@
             if (_selectedTool)
                 _selectedTool.activate(toolId);
         });
+
+        initData();
     });
-    
+
+    var toolContext = null;
     function initTools() {
         var upCtx = document.getElementById('upCanvas').getContext('2d');
         var downCtx = document.getElementById('canvas').getContext('2d');
-        var toolContext = {
+        toolContext = {
             DownCtx: downCtx,
             UpCtx: upCtx,
             State: _state,
@@ -93,7 +101,8 @@
             DownCanvas: $('#canvas'),
             UpCanvas: $('#upCanvas'),
             Graph: new SchemeGraph(),
-            Rooms:{}
+            Rooms: {},
+            Doors:[]
         };
 
         _selectedTool = _idToTool['wall'] = new WallTool(toolContext);
@@ -160,4 +169,116 @@
 
     var _idToTool = {};
     var _state = { Walls: [] };
+    
+    function convertToServer() {
+        var result = { rooms: [], items: [] };
+        
+        var rooms = toolContext.Rooms;
+        for (var k in rooms) {
+            if (!rooms.hasOwnProperty(k))
+                continue;
+
+            var room = rooms[k];
+            var roomInfo = {
+                title: room.Name,
+                color: room.Color,
+                id: k,
+                points:[]
+            };
+            
+            for (var i = 0; i < room.Contour.length; ++i) {
+                var idx = room.Contour[i];
+                var point = toolContext.Graph.getPointFromIndex(idx);
+                var pointInfo = [point.x, point.y];
+                roomInfo.points.push(pointInfo);
+            }
+
+            result.rooms.push(roomInfo);
+            
+            for (i = 0; i < room.Items.length; ++i) {
+                var item = room.Items[i];
+                var itemInfo = {
+                    title: item.Name,
+                    room: k,
+                    qr_code: item.QRCode,
+                };
+                if (item.x) {
+                    itemInfo.location = [item.x, item.y];
+                }
+                result.items.push(itemInfo);
+            }
+            
+            result.doors = toolContext.Doors;
+        }
+        return result;
+    }
+    
+    function convertFromServer(data) {
+        toolContext.Doors = data.doors;
+
+        for (var i = 0; i < data.rooms.length; ++i) {
+            var roomInfo = data.rooms[i];
+            var contour = [];
+
+            var lastIdx = null;
+            for (var j = 0; j < roomInfo.points.length; ++j)
+            {
+                var coords = roomInfo.points[j];
+                if (coords[0] < -0.5 || coords[1] < -0.5)
+                    continue;
+                
+                var point = { x: coords[0], y: coords[1] };
+                var idx = toolContext.Graph.getPointIndex(point);
+                if (lastIdx)
+                    toolContext.Graph.addWall(lastIdx, idx, toolContext);
+                lastIdx = idx;
+                contour.push(idx);
+            }
+            toolContext.Graph.addWall(contour[contour.length - 1], contour[0], toolContext);
+            toolContext.Graph.addWall(contour[0], contour[1], toolContext);
+            
+            var room = {
+                Name: roomInfo.title,
+                Color: roomInfo.color,
+                Contour: contour,
+                Items:{}
+            };
+            toolContext.Rooms[roomInfo.id] = room;
+        }
+        
+        for (i = 0; i < data.items.length; ++i) {
+            var itemInfo = data.items[i];
+            room = toolContext.Rooms[itemInfo.room];
+            var item = {
+                Name: itemInfo.title,
+                QRCode:itemInfo.qr_code,    
+            };
+            coords = itemInfo.locataion;
+            if (coords) {
+                item.x = coords[0];
+                item.y = coords[1];
+            }
+
+            room.items.push(item);
+        }
+    }
+    
+    
+    function initData() {
+        convertFromServer(serverData);
+        
+        $('#saveScheme').click(function() {
+            var toServer = convertToServer();
+            $.ajax({
+                url: '@Url.Action("Save", "SchemeEditor")',
+                type: 'post',
+                data: { file: JSON.stringify(toServer) }
+                });
+        });
+    }
+
+    @if (!String.IsNullOrEmpty(ViewBag.Scheme))
+    {
+        @:var serverData = @Html.Raw(ViewBag.Scheme)
+    }
 </script>

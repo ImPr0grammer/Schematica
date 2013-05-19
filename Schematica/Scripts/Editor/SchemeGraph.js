@@ -14,11 +14,17 @@
                 row = {};
                 graph[fromIndex] = row;
             }
+            
             row[toIndex] = 1;
             
             points[fromIndex].used++;
         }
 
+        // Не добавляем стену дважны
+        var disjoint = graph[toIdx];
+        if (disjoint && disjoint[fromIdx] == 1)
+            return { From: fromIdx, To: toIdx };
+        
         // граф не ориентированный
         addToGraph(fromIdx, toIdx);
         addToGraph(toIdx, fromIdx);
@@ -138,6 +144,10 @@
         return -1;
     };
 
+    this.getPointFromIndex = function(idx) {
+        return points[idx];
+    };
+
     this.movePoint = function(idx, point) {
         points[idx].x = point.x;
         points[idx].y = point.y;
@@ -165,8 +175,23 @@
                     continue;
 
                 var dist = area / wallLength;
-                if (dist < radious * 2)
-                    return wall;
+                if (dist > radious * 2)
+                    continue;
+
+                // ЧТобы не выделять за пределами прямой
+                if (point.x > Math.max(points[wall.From].x, points[wall.To].x) + radious)
+                    continue;
+
+                if (point.x < Math.min(points[wall.From].x, points[wall.To].x) - radious)
+                    continue;
+
+                if (point.y > Math.max(points[wall.From].y, points[wall.To].y) + radious)
+                    continue;
+                
+                if (point.y < Math.min(points[wall.From].y, points[wall.To].y) - radious)
+                    continue;
+
+                return wall;
             }
         }
         return null;
@@ -367,8 +392,15 @@
 
             var zeroY = (from.y * (to.x - from.x) + from.x * (from.y - to.y)) / (to.x - from.x);
 
-            if (zeroY >= 0)
-                count++;
+            if (zeroY < -1e-10)
+                continue;
+
+            if (Math.max(from.x, to.x) < -1e-10)
+                continue;
+            
+            if (Math.min(from.x, to.x) > 1e-10)
+                continue;
+            count++;
         }
 
         var result = count % 2 == 1;
