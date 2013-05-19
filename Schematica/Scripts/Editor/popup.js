@@ -1,7 +1,5 @@
 ﻿
 function Popup(width, height, content) {
-    $('.popup-wrapper').hide();
-
     var panel = $('<div>&zwj;</div>')
         .css('width', width)
         .css('height', height)
@@ -31,4 +29,8 @@ function Popup(width, height, content) {
             content.hide().appendTo('body');
         wrapper.remove();
     });
+}
+
+function closePopup() {
+    $('.popup-wrapper').remove();
 }

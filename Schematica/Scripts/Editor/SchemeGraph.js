@@ -398,4 +398,14 @@
             return null;
         };
     }
+
+    this.highlightContour = function(contour, ctx) {
+        for (var i = 0; i < contour.length; ++i) {
+            var fromIdx = contour[i];
+            var toIdx = contour[(i + 1) % contour.length];
+            ctx.Graph.drawSelected({
+                Wall: { From: fromIdx, To: toIdx }
+            }, ctx);
+        }
+    };
 }

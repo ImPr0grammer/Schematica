@@ -42,3 +42,16 @@ function len(point) {
 function sqr(a) {
     return a * a;
 }
+
+function getContourKey(idxes) {
+    var min = 10e10;
+    var key = null;
+    for (var i = 0; i < idxes.length; ++i) {
+        if (idxes[i] < min) {
+            min = idxes[i];
+            var next = idxes[(i + 1) % idxes.length];
+            key = min + "," + next;
+        }
+    }
+    return key;
+}

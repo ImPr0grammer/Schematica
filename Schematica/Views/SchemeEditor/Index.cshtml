@@ -6,6 +6,8 @@
 <script type="text/javascript" src="/Scripts/Editor/wall-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/room-tool.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/move-tool.js"></script>
+<script type="text/javascript" src="/Scripts/Editor/point-tool.js"></script>
+
 <script type="text/javascript" src="/Scripts/Editor/SchemeGraph.js"></script>
 <script type="text/javascript" src="/Scripts/Editor/popup.js"></script>
 
@@ -74,7 +76,7 @@
             // Включаем выделенный инструмент
             _selectedTool = newTool;
             if (_selectedTool)
-                _selectedTool.activate();
+                _selectedTool.activate(toolId);
         });
     });
     
@@ -89,11 +91,15 @@
             Height: 500,
             DownCanvas: $('#canvas'),
             UpCanvas: $('#upCanvas'),
-            Graph: new SchemeGraph()
+            Graph: new SchemeGraph(),
+            Rooms:{}
         };
 
         _selectedTool = _idToTool['wall'] = new WallTool(toolContext);
         _idToTool['room'] = new RoomTool(toolContext);
+        _idToTool['pointInRoom'] = new PointTool(toolContext);
+        _idToTool['coordPoint'] = new PointTool(toolContext);
+        _idToTool['QRCode'] = new PointTool(toolContext);
     }
     
     function bindEvents() {
